@@ -129,9 +129,27 @@ const adminLogin = async (req, res) => {
   }
 };
 
+const getProfile=async(req,res)=>{
+  try{
+    const {id}=req.user
+    const user=await User.findById(id).select("-password")
+    if(!user){
+      if (!user) {
+        return res.json({ message: "user does not exist", success: false });
+      }
+    }
+    res.json(user)
+
+
+  }catch(error){
+    return res.json({ message: "Internal server error", success: false });
+  }
+}
+
 module.exports = {
   registerUser,
   loginUser,
   logoutUser,
   adminLogin,
+  getProfile
 };
