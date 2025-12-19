@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
+
 const bcrypt = require("bcrypt");
+
 const User = require("../models/userModel");
 
 const generateToken = (res, payload) => {
@@ -119,9 +121,9 @@ const adminLogin = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    return res.json({
-      message: "Admin logged in successfully",
-      success: true,
+    return res.json({ message: "Admin logged in successfully",
+      success: true,admin:{admin:adminEmail},
+     
     });
   } catch (error) {
     console.log(error.message);
@@ -133,14 +135,28 @@ const getProfile=async(req,res)=>{
   try{
     const {id}=req.user
     const user=await User.findById(id).select("-password")
-    if(!user){
+
       if (!user) {
         return res.json({ message: "user does not exist", success: false });
       }
-    }
+    
     res.json(user)
 
 
+  }catch(error){
+    return res.json({ message: "Internal server error", success: false });
+  }
+}
+
+const isAuth=async(req,res)=>{
+  try{
+    const {id}=req.user
+    const user=await User.findById(id).select("-password")
+
+      if (!user) {
+        return res.json({ message: "user does not exist", success: false });
+      } 
+      res.json({message:"User is authenticated",success:true,user})
   }catch(error){
     return res.json({ message: "Internal server error", success: false });
   }
@@ -151,5 +167,6 @@ module.exports = {
   loginUser,
   logoutUser,
   adminLogin,
-  getProfile
+  getProfile,
+  isAuth
 };

@@ -1,8 +1,10 @@
 
 const cloudinary = require("cloudinary").v2;
+
 const Category = require("../models/categoryModel");
 
 const addCategory = async (req, res) => {
+    
     try {
         const { name } = req.body;
 
