@@ -1,6 +1,8 @@
 const Menu = require("../models/menuModel");
 
-const cloudinary = require("cloudinary").v2;
+const buildFileUrl = (req, filename) => {
+    return `${req.protocol}://${req.get('host')}/uploads/${filename}`;
+};
 
 
 const addMenuItem = async (req, res) => {
@@ -11,14 +13,12 @@ const addMenuItem = async (req, res) => {
             return res.status(400).json({ message: "All fields are required", success: false });
         }
 
-        const result = await cloudinary.uploader.upload(req.file.path);
-
         const newMenuItem = await Menu.create({
             name,
             description,
             price,
-          category,
-            image: result.secure_url,
+            category,
+            image: buildFileUrl(req, req.file.filename),
         });
 
         res.status(201).json({
@@ -44,8 +44,7 @@ const updateMenuItem = async (req, res) => {
         const updateData = { name, description, price, category, available };
 
         if (req.file) {
-            const result = await cloudinary.uploader.upload(req.file.path);
-            updateData.image = result.secure_url;
+            updateData.image = buildFileUrl(req, req.file.filename);
         }
 
         const updatedMenuItem = await Menu.findByIdAndUpdate(id, updateData, { new: true });

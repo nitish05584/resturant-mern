@@ -16,9 +16,16 @@ const AppContextProvider = ({ children }) => {
 
     const [user, setUser] = useState(null);
 
-    const [admin, setAdmin] = useState(null);
+    const [admin, setAdmin] = useState(() => {
+        try {
+            return JSON.parse(localStorage.getItem('admin')) || null;
+        } catch (error) {
+            return null;
+        }
+    });
     const [categories,setCategories]=useState([])
     const [menus, setMenus] = useState([]);
+    const [cart, setCart] = useState([]);
 
 
     const fetchCategories=async()=>{
@@ -76,6 +83,47 @@ const AppContextProvider = ({ children }) => {
         fetchMenus()
     },[])
 
+    useEffect(() => {
+        if (admin) {
+            localStorage.setItem('admin', JSON.stringify(admin));
+        } else {
+            localStorage.removeItem('admin');
+        }
+    }, [admin]);
+
+    const addToCart = (product) => {
+        const existingItem = cart.find(item => item._id === product._id);
+        if (existingItem) {
+            setCart(cart.map(item =>
+                item._id === product._id
+                    ? { ...item, quantity: item.quantity + 1 }
+                    : item
+            ));
+        } else {
+            setCart([...cart, { ...product, quantity: 1 }]);
+        }
+    };
+
+    const removeFromCart = (productId) => {
+        setCart(cart.filter(item => item._id !== productId));
+    };
+
+    const updateCartItem = (productId, quantity) => {
+        if (quantity <= 0) {
+            removeFromCart(productId);
+        } else {
+            setCart(cart.map(item =>
+                item._id === productId
+                    ? { ...item, quantity }
+                    : item
+            ));
+        }
+    };
+
+    const clearCart = () => {
+        setCart([]);
+    };
+
 
     const value = {
         navigate,
@@ -89,7 +137,12 @@ const AppContextProvider = ({ children }) => {
         categories,
         fetchCategories,
         menus,
-        fetchMenus
+        fetchMenus,
+        cart,
+        addToCart,
+        removeFromCart,
+        updateCartItem,
+        clearCart
     };
 
     return (

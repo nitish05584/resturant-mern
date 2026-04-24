@@ -4,7 +4,7 @@ import { AppContext } from "../../context/AppContext";
 import { useState, useContext } from "react";
 import toast from "react-hot-toast";
 const AddMenu = () => {
-  const { axios, navigate, loading, setLoading, categories } =
+  const { axios, navigate, Loading, setLoading, categories } =
     useContext(AppContext);
   const [formData, setFormData] = useState({
     name: "",
@@ -34,7 +34,14 @@ const AddMenu = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const { data } = await axios.post("/api/menu/add", formData, {
+      const payload = new FormData();
+      payload.append("name", formData.name);
+      payload.append("price", formData.price);
+      payload.append("description", formData.description);
+      payload.append("category", formData.category);
+      payload.append("image", formData.image);
+
+      const { data } = await axios.post("/api/menu/add", payload, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       if (data.success) {
@@ -141,7 +148,7 @@ const AddMenu = () => {
         {preview && <img src={preview} alt="preview" className="w-22" />}
 
         <button className="bg-orange-500 text-white px-8 py-3 cursor-pointer">
-          {loading ? "adding.." : "add Menu"}
+          {Loading ? "adding.." : "add Menu"}
         </button>
       </form>
     </div>

@@ -69,6 +69,7 @@ const AdminLayout = () => {
       if (data.success) {
         toast.success(data.message);
         setAdmin(null);
+        localStorage.removeItem('admin');
       
       } else {
         toast.error(data.message);
