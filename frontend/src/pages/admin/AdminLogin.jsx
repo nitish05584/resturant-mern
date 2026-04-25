@@ -1,8 +1,6 @@
 import React, { useContext, useState } from 'react'
-
-import {  LockIcon, MailIcon, User2Icon } from 'lucide-react';
+import { LockIcon, MailIcon } from 'lucide-react';
 import {toast} from 'react-hot-toast';
-import { Link, replace } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 
 const AdminLogin = () => {
@@ -25,10 +23,9 @@ const AdminLogin = () => {
     if(data?.success){
      
      localStorage.setItem("admin",JSON.stringify(data.admin));
-     setAdmin(true);
+     setAdmin(data.admin);
       toast.success(data.message);
       navigate("/admin");
-      console.log(data);
     }else{
       toast.error(data?.message); 
     }
@@ -59,7 +56,7 @@ const AdminLogin = () => {
 
         <div className="flex items-center w-full mt-4 bg-white dark:bg-zinc-800 border border-zinc-300/80 dark:border-zinc-700 h-12 rounded-full overflow-hidden pl-6 gap-2">
           {/* Mail Icon */}
-          <MailIcon className="text-white" />
+          <MailIcon className="text-zinc-500" />
           <input
             type="email"
             placeholder="Email id"
@@ -74,7 +71,7 @@ const AdminLogin = () => {
 
         <div className="flex items-center mt-4 w-full bg-white dark:bg-zinc-800 border border-zinc-300/80 dark:border-zinc-700 h-12 rounded-full overflow-hidden pl-6 gap-2">
           {/* Lock Icon */}
-          <LockIcon className="text-white" />
+          <LockIcon className="text-zinc-500" />
           <input
             type="password"
             placeholder="Password"

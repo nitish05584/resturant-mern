@@ -13,7 +13,7 @@ router.get("/my-bookings",protect,getUserBookings)
 router.get("/bookings",protect,adminOnly,getAllBookings)
 
 
-router.put("/update-status",protect,adminOnly,updateBookingStatus)
+router.put("/update-status/:bookingId",protect,adminOnly,updateBookingStatus)
 
 
 

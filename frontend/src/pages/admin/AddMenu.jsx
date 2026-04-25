@@ -4,7 +4,7 @@ import { AppContext } from "../../context/AppContext";
 import { useState, useContext } from "react";
 import toast from "react-hot-toast";
 const AddMenu = () => {
-  const { axios, navigate, Loading, setLoading, categories } =
+  const { axios, navigate, loading, setLoading, categories, fetchMenus } =
     useContext(AppContext);
   const [formData, setFormData] = useState({
     name: "",
@@ -46,12 +46,19 @@ const AddMenu = () => {
       });
       if (data.success) {
         toast.success(data.message);
+        fetchMenus();
         navigate("/admin/menus");
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.response.data.message || "Something went wrong");
+      const statusCode = error?.response?.status;
+      if (statusCode === 401 || statusCode === 403) {
+        toast.error("Admin session expired. Please login again.");
+        navigate("/admin");
+      } else {
+        toast.error(error.response?.data?.message || "Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
@@ -148,7 +155,7 @@ const AddMenu = () => {
         {preview && <img src={preview} alt="preview" className="w-22" />}
 
         <button className="bg-orange-500 text-white px-8 py-3 cursor-pointer">
-          {Loading ? "adding.." : "add Menu"}
+          {loading ? "adding.." : "add Menu"}
         </button>
       </form>
     </div>

@@ -24,6 +24,43 @@ const Menus = () => {
     }
   };
 
+  const editMenu = async (item) => {
+    const name = window.prompt("Update menu name", item.name || "");
+    if (!name || !name.trim()) return;
+
+    const description = window.prompt("Update description", item.description || "");
+    if (!description || !description.trim()) return;
+
+    const priceInput = window.prompt("Update price", String(item.price ?? ""));
+    const price = Number(priceInput);
+
+    if (!Number.isFinite(price) || price < 0) {
+      toast.error("Please enter a valid price");
+      return;
+    }
+
+    const categoryId = typeof item.category === "object" ? item.category?._id : item.category;
+
+    try {
+      const { data } = await axios.put(`/api/menu/update/${item._id}`, {
+        name: name.trim(),
+        description: description.trim(),
+        price,
+        category: categoryId,
+        available: item.available,
+      });
+
+      if (data.success) {
+        toast.success(data.message);
+        fetchMenus();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error updating menu");
+    }
+  };
+
   return (
     <div className="p-4 md:p-8">
       <div className="flex justify-between items-center mb-8">
@@ -73,7 +110,7 @@ const Menus = () => {
                   </td>
                   <td className="px-6 py-4 flex gap-3">
                     <button
-                      onClick={() => navigate(`/admin/update-menu/${item._id}`)}
+                      onClick={() => editMenu(item)}
                       className="text-blue-600 hover:text-blue-800 transition"
                       title="Edit"
                     >

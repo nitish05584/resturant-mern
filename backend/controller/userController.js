@@ -4,17 +4,23 @@ const bcrypt = require("bcrypt");
 
 const User = require("../models/userModel");
 
+const getCookieOptions = () => {
+  const isProduction = process.env.NODE_ENV === "production";
+
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "strict" : "lax",
+    maxAge: 24 * 60 * 60 * 1000,
+  };
+};
+
 const generateToken = (res, payload) => {
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: "1d",   
   });
 
-  res.cookie("token", token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "strict",
-    maxAge: 24 * 60 * 60 * 1000,
-  });
+  res.cookie("token", token, getCookieOptions());
 
   return token;
 };
@@ -87,7 +93,12 @@ const loginUser = async (req, res) => {
 
 const logoutUser = async (req, res) => {
   try {
-    res.clearCookie("token");
+    const options = getCookieOptions();
+    res.clearCookie("token", {
+      httpOnly: options.httpOnly,
+      secure: options.secure,
+      sameSite: options.sameSite,
+    });
     return res.json({ message: "User logged out successfully", success: true });
   } catch (error) {
     console.log(error.message);
@@ -114,12 +125,7 @@ const adminLogin = async (req, res) => {
       expiresIn: "1d",
     });
 
-     res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000,
-    });
+     res.cookie("token", token, getCookieOptions());
 
     return res.json({ message: "Admin logged in successfully",
       success: true,admin:{admin:adminEmail},

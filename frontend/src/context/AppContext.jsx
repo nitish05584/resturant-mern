@@ -12,7 +12,7 @@ const AppContextProvider = ({ children }) => {
     
     const navigate = useNavigate();
     
-    const [Loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const [user, setUser] = useState(null);
 
@@ -30,7 +30,7 @@ const AppContextProvider = ({ children }) => {
 
     const fetchCategories=async()=>{
         try{
-            const {data}=await axios.get("api/category/all")
+            const {data}=await axios.get("/api/category/all")
             
             if(data.success){
                 setCategories(data.categories);
@@ -48,8 +48,6 @@ const AppContextProvider = ({ children }) => {
     const fetchMenus=async()=>{
         try{
             const {data}=await axios.get("/api/menu/all")
-            console.log(data)
-            
             if(data.success){
                 setMenus(data.menuItem);
                 
@@ -127,7 +125,8 @@ const AppContextProvider = ({ children }) => {
 
     const value = {
         navigate,
-        Loading,
+        loading,
+        Loading: loading,
         setLoading,
         user,
         setUser,

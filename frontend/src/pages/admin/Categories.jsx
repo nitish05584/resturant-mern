@@ -24,6 +24,29 @@ const Categories = () => {
     }
   }
 
+  const editCategory = async (category) => {
+    const newName = window.prompt('Update category name', category.name)
+
+    if (!newName || newName.trim() === '' || newName.trim() === category.name) {
+      return
+    }
+
+    try {
+      const { data } = await axios.put(`/api/category/update/${category._id}`, {
+        name: newName.trim(),
+      })
+
+      if (data.success) {
+        toast.success(data.message)
+        fetchCategories()
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Error updating category')
+    }
+  }
+
   return (
     <div className="p-4 md:p-8">
       <div className="flex justify-between items-center mb-8">
@@ -53,7 +76,7 @@ const Categories = () => {
                 <h3 className="text-lg font-bold text-gray-800 mb-4">{category.name}</h3>
                 <div className="flex gap-3">
                   <button
-                    onClick={() => navigate(`/admin/update-category/${category._id}`)}
+                    onClick={() => editCategory(category)}
                     className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition flex items-center justify-center gap-2"
                   >
                     <Edit className="w-4 h-4" />

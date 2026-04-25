@@ -5,19 +5,22 @@ import { toast } from "react-hot-toast";
 const Bookings = () => {
   const { admin, axios, loading, setLoading } = useContext(AppContext);
   const [bookings, setBookings] = useState([]);
+  const [loadingBookings, setLoadingBookings] = useState(true);
 
-  const fecthBookings = async () => {
+  const fetchBookings = async () => {
     try {
+      setLoadingBookings(true);
       const { data } = await axios.get("/api/booking/bookings");
-      console.log("dataa", data);
 
       if (data.success) {
         setBookings(data.bookings);
       } else {
-        console.log(data.message);
+        toast.error(data.message || "Failed to fetch bookings");
       }
     } catch (error) {
-      console.log(error);
+      toast.error(error.response?.data?.message || "Failed to fetch bookings");
+    } finally {
+      setLoadingBookings(false);
     }
   };
 
@@ -33,12 +36,12 @@ const Bookings = () => {
 
       if (data.success) {
         toast.success(data.message);
-        fecthOrders();
+        fetchBookings();
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-      console.log(error);
+      toast.error(error.response?.data?.message || "Failed to update booking status");
     } finally {
       setLoading(false);
     }
@@ -46,17 +49,39 @@ const Bookings = () => {
 
   useEffect(() => {
     if (admin) {
-      fecthBookings();
+      fetchBookings();
     }
-  }, []);
+  }, [admin]);
+
+  const getStatusColor = (status) => {
+    if (status === "confirmed") return "bg-green-100 text-green-700";
+    if (status === "cancelled") return "bg-red-100 text-red-700";
+    return "bg-yellow-100 text-yellow-700";
+  };
+
   return (
     <div className="py-24 px-3 sm:px-6">
-      <h1 className="text-3xl font-bold text-center my-3">All Bookings</h1>
+      <div className="max-w-5xl mx-auto flex items-center justify-between gap-3 my-3">
+        <h1 className="text-3xl font-bold">All Bookings</h1>
+        <button
+          onClick={fetchBookings}
+          className="rounded-lg bg-orange-600 px-4 py-2 text-white font-semibold hover:bg-orange-700 transition"
+        >
+          Refresh
+        </button>
+      </div>
+
       <div className="border border-gray-400 max-w-5xl mx-auto p-3 rounded-lg">
+        {loadingBookings ? (
+          <div className="py-10 text-center text-gray-600">Loading bookings...</div>
+        ) : bookings.length === 0 ? (
+          <div className="py-10 text-center text-gray-600">No bookings found</div>
+        ) : (
+          <>
         {/* Header */}
         <div className="hidden md:grid grid-cols-6 font-semibold text-gray-700 mb-4">
           <div>Name</div>
-          <div>Name</div>
+          <div>Phone</div>
           <div>Persons</div>
           <div>Date</div>
           <div>Time</div>
@@ -85,6 +110,9 @@ const Bookings = () => {
                 </p>
                 <p className="text-gray-600 hidden md:block">{item?.time}</p>
                 <div className="flex justify-center md:justify-start items-center gap-2 md:gap-5 mt-2 md:mt-0">
+                  <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(item.status)}`}>
+                    {item.status}
+                  </span>
                   <select
                     name="status"
                     value={item.status}
@@ -94,15 +122,17 @@ const Bookings = () => {
                     disabled={loading}
                     className="border rounded-md px-3 py-2"
                   >
-                    <option value="Pending">Pending</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Cancelled">Cancelled</option>
+                    <option value="pending">pending</option>
+                    <option value="confirmed">confirmed</option>
+                    <option value="cancelled">cancelled</option>
                   </select>
                 </div>
               </div>
             </li>
           ))}
         </ul>
+        </>
+        )}
       </div>
     </div>
   );

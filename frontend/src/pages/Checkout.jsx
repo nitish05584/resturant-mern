@@ -102,13 +102,22 @@ const Checkout = () => {
         .filter(Boolean)
         .join(', ')
 
+      const orderItems = cart
+        .map((item) => ({
+          menuItem: item?._id || item?.id,
+          quantity: Number(item?.quantity) || 1
+        }))
+        .filter((item) => item.menuItem)
+
+      if (orderItems.length === 0) {
+        toast.error('Your cart has invalid items. Please add items again.')
+        return
+      }
+
       const payload = {
         address: fullAddress,
         paymentMethod: paymentMethodMap[paymentMethod] || 'Cash on Delivery',
-        items: cart.map((item) => ({
-          menuItem: item._id,
-          quantity: item.quantity
-        }))
+        items: orderItems
       }
 
       const { data } = await axios.post('/api/order/place', payload)

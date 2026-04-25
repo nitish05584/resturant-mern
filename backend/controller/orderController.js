@@ -1,11 +1,17 @@
 const Cart = require("../models/cartModel");
 const Order = require("../models/orderModel");
 const Menu = require("../models/menuModel");
+const mongoose = require("mongoose");
 
 const placeOrder=async(req,res)=>{
     try {
-        const { id } = req.user;
+        const { id } = req.user || {};
         const {address, paymentMethod, items} = req.body;
+
+        if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(401).json({ message: 'Please login with a valid user account to place order.', success: false });
+        }
+
         if(!address){
             return  res.status(400).json({ message: 'Address is required to place an order.',success:false });
         }
@@ -14,7 +20,14 @@ const placeOrder=async(req,res)=>{
         let totalAmount = 0;
 
         if (Array.isArray(items) && items.length > 0) {
-            const menuIds = items.map((item) => item.menuItem);
+            const menuIds = items
+                .map((item) => item?.menuItem)
+                .filter((menuId) => mongoose.Types.ObjectId.isValid(menuId));
+
+            if (menuIds.length === 0) {
+                return res.status(400).json({ message: 'No valid menu items were provided.', success: false });
+            }
+
             const menus = await Menu.find({ _id: { $in: menuIds } });
             const menuMap = new Map(menus.map((menu) => [menu._id.toString(), menu]));
 
@@ -65,6 +78,11 @@ const placeOrder=async(req,res)=>{
             res.status(201).json({ message: 'Order placed successfully.', order: newOrder,success:true });
     } catch (error) {
         console.error('Error placing order:', error);
+
+        if (error?.name === 'CastError' || error?.name === 'ValidationError') {
+            return res.status(400).json({ message: 'Invalid order payload.', success: false });
+        }
+
         res.status(500).json({ message: 'Internal server error',success:false });
     }
 }

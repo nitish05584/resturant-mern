@@ -24,7 +24,7 @@ const formatCurrency = (amount) => {
 
 const getStatusStyles = (status) => {
   const normalized = (status || '').toLowerCase()
-  if (normalized === 'delivered' || normalized === 'approved') {
+  if (normalized === 'delivered' || normalized === 'confirmed') {
     return 'bg-green-100 text-green-700 border-green-200'
   }
   if (normalized === 'preparing' || normalized === 'pending') {
@@ -103,7 +103,8 @@ const Dashboard = () => {
       return status === 'pending' || status === 'preparing'
     }).length
 
-    const approvedBookings = bookings.filter((item) => (item.status || '').toLowerCase() === 'approved').length
+    const confirmedBookings = bookings.filter((item) => (item.status || '').toLowerCase() === 'confirmed').length
+    const pendingBookings = bookings.filter((item) => (item.status || '').toLowerCase() === 'pending').length
     const todayOrders = orders.filter((item) => isToday(item.createdAt)).length
     const todayBookings = bookings.filter((item) => isToday(item.date)).length
 
@@ -114,7 +115,8 @@ const Dashboard = () => {
       totalBookings: bookings.length,
       totalRevenue,
       pendingOrders,
-      approvedBookings,
+      confirmedBookings,
+      pendingBookings,
       todayOrders,
       todayBookings,
     }
@@ -175,11 +177,11 @@ const Dashboard = () => {
     },
     {
       label: 'Pending Actions',
-      value: stats.pendingOrders + (stats.totalBookings - stats.approvedBookings),
+      value: stats.pendingOrders + stats.pendingBookings,
       icon: AlertTriangle,
       color: 'from-rose-500 to-red-600',
       link: '/admin/orders',
-      hint: `${stats.pendingOrders} orders + ${stats.totalBookings - stats.approvedBookings} bookings`,
+      hint: `${stats.pendingOrders} orders + ${stats.pendingBookings} bookings`,
     },
   ]
 
