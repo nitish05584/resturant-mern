@@ -65,7 +65,7 @@ app.use('/api/booking',bookingRoutes)
 
 
 
-const port=process.env.port||8000
+const port = process.env.PORT || process.env.port || 8000
 
 app.listen(port,()=>{
     console.log(`server is running on ${port}`.bgGreen)
